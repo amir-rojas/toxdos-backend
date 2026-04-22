@@ -35,10 +35,14 @@ const serveFrontend = fs.existsSync(FRONTEND_DIST)
 
 const app = express()
 
+const corsOptions = {
+  origin: process.env['ALLOWED_ORIGINS']?.split(',').map(o => o.trim()) ?? 'http://localhost:5173',
+}
+
+// cors must run before helmet so its headers aren't overridden
+app.use(cors(corsOptions))
+app.options('*', cors(corsOptions))  // explicit preflight for all routes
 app.use(helmet())
-app.use(cors({
-  origin: process.env['ALLOWED_ORIGINS']?.split(',') ?? 'http://localhost:5173',
-}))
 app.use(express.json())
 
 // Serve built frontend — only active when dist/ exists (demo/production mode)
