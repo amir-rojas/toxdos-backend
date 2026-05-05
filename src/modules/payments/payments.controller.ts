@@ -115,6 +115,7 @@ export async function getPaymentVoucher(req: Request, res: Response, next: NextF
       customerName:      payment.customer_name,
       customerIdNumber:  payment.customer_id_number,
       paidAt:            payment.paid_at,
+      pawnDueDate:       payment.pawn_due_date,
     })
     res.setHeader('Content-Type', 'text/html; charset=utf-8')
     res.send(html)

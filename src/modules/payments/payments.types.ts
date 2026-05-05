@@ -17,6 +17,7 @@ export interface PaymentForVoucher {
   pawn_id: number
   payment_type: 'interest' | 'redemption' | 'partial'
   paid_at: string
+  pawn_due_date: string
   customer_name: string
   customer_id_number: string
 }

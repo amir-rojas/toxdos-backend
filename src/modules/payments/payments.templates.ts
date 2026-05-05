@@ -7,7 +7,7 @@ function esc(s: string): string {
     .replace(/'/g, '&#39;')
 }
 
-function fmtShort(isoDatetime: string): string {
+function fmtShort(isoDatetime: string | Date): string {
   const d = new Date(isoDatetime)
   const day   = String(d.getUTCDate()).padStart(2, '0')
   const month = String(d.getUTCMonth() + 1).padStart(2, '0')
@@ -15,7 +15,7 @@ function fmtShort(isoDatetime: string): string {
   return `${day}/${month}/${year}`
 }
 
-function addOneMonth(isoDatetime: string): string {
+function addOneMonth(isoDatetime: string | Date): string {
   const d = new Date(isoDatetime)
   d.setUTCMonth(d.getUTCMonth() + 1)
   return fmtShort(d.toISOString())
@@ -24,12 +24,13 @@ function addOneMonth(isoDatetime: string): string {
 export function buildVoucherHtml(data: {
   customerName: string
   customerIdNumber: string
-  paidAt: string
+  paidAt: string | Date
+  pawnDueDate: string | Date
 }): string {
   const name  = esc(data.customerName)
   const ci    = esc(data.customerIdNumber)
-  const since = fmtShort(data.paidAt)
-  const until = addOneMonth(data.paidAt)
+  const since = fmtShort(data.pawnDueDate)
+  const until = addOneMonth(data.pawnDueDate)
 
   return `<!DOCTYPE html>
 <html lang="es">

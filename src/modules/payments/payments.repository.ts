@@ -57,7 +57,8 @@ export async function create(params: {
       )
     }
 
-    // 4. On redemption: single movement for total, update pawn + all items
+    // 4. On redemption: mark pawn + items as redeemed
+    //    On interest payment: extend due_date by 1 month and mark as renewed
     if (params.isRedemption) {
       await client.query(
         `UPDATE pawns SET status = 'redeemed', updated_at = now() WHERE pawn_id = $1`,
@@ -65,6 +66,15 @@ export async function create(params: {
       )
       await client.query(
         `UPDATE items SET status = 'redeemed', updated_at = now() WHERE pawn_id = $1`,
+        [params.pawnId]
+      )
+    } else if (params.paymentType === 'interest') {
+      await client.query(
+        `UPDATE pawns
+         SET status = 'renewed',
+             due_date = due_date + INTERVAL '1 month',
+             updated_at = now()
+         WHERE pawn_id = $1`,
         [params.pawnId]
       )
     }
@@ -103,6 +113,7 @@ export async function findForVoucher(paymentId: number): Promise<PaymentForVouch
             pay.pawn_id,
             pay.payment_type,
             pay.paid_at,
+            pw.due_date  AS pawn_due_date,
             c.full_name  AS customer_name,
             c.id_number  AS customer_id_number
      FROM payments pay
