@@ -34,7 +34,10 @@ export async function findById(sessionId: number): Promise<CashSession | null> {
 
 export async function findOpenByUserId(userId: number): Promise<CashSession | null> {
   const result = await pool.query<CashSession>(
-    `SELECT * FROM cash_sessions WHERE user_id = $1 AND status = 'open'`,
+    `SELECT cs.*, u.full_name AS cashier_name
+     FROM cash_sessions cs
+     JOIN users u ON u.user_id = cs.user_id
+     WHERE cs.user_id = $1 AND cs.status = 'open'`,
     [userId]
   )
   return result.rows[0] ?? null
