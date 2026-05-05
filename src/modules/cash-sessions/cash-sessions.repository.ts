@@ -53,7 +53,7 @@ export async function findAll(
       `SELECT cs.*, u.full_name AS cashier_name
        FROM cash_sessions cs
        JOIN users u ON u.user_id = cs.user_id
-       ORDER BY cs.opened_at DESC
+       ORDER BY CASE WHEN cs.status = 'open' THEN 0 ELSE 1 END, cs.session_id DESC
        LIMIT $1 OFFSET $2`,
       [pagination.limit, offset]
     ),
