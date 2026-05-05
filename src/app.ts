@@ -41,7 +41,7 @@ const corsOptions = {
 
 // cors must run before helmet so its headers aren't overridden
 app.use(cors(corsOptions))
-app.options('*', cors(corsOptions))  // explicit preflight for all routes
+app.options('/*path', cors(corsOptions))  // explicit preflight for all routes
 app.use(helmet())
 app.use(express.json())
 
@@ -73,7 +73,7 @@ app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
 
 // SPA fallback — must be last, only in demo/production mode
 if (serveFrontend) {
-  app.get('/{*path}', (_req: Request, res: Response) => {
+  app.get('/*path', (_req: Request, res: Response) => {
     res.sendFile(path.join(FRONTEND_DIST, 'index.html'))
   })
 }
