@@ -7,11 +7,12 @@ function esc(s: string): string {
     .replace(/'/g, '&#39;')
 }
 
-function fmtDateLong(iso: string): string {
+function fmtDateLong(date: string | Date): string {
   const months = [
     'enero','febrero','marzo','abril','mayo','junio',
     'julio','agosto','septiembre','octubre','noviembre','diciembre',
   ]
+  const iso = date instanceof Date ? date.toISOString().slice(0, 10) : date
   const [year, month, day] = iso.split('-')
   return `${parseInt(day!, 10)} de ${months[parseInt(month!, 10) - 1]} de ${year}`
 }
@@ -21,7 +22,7 @@ export function buildContractHtml(data: {
   customerName: string
   customerIdNumber: string
   customerAddress: string | null
-  startDate: string
+  startDate: string | Date
 }): string {
   const name    = esc(data.customerName)
   const ci      = esc(data.customerIdNumber)
