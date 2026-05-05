@@ -4,7 +4,7 @@ import { BadRequestError, ForbiddenError, NotFoundError, UnprocessableError } fr
 import type { PaginationParams } from '../../shared/pagination'
 import type { UserProfile } from '../auth/auth.types'
 import * as repository from './pawns.repository'
-import type { CreatePawnDto, Pawn, PawnWithItems } from './pawns.types'
+import type { CreatePawnDto, Pawn, PawnForContract, PawnWithItems } from './pawns.types'
 
 export async function createPawn(
   dto: CreatePawnDto,
@@ -81,6 +81,18 @@ export async function getPawnById(
     throw new ForbiddenError('You do not have permission to view this pawn', 'FORBIDDEN')
   }
 
+  return pawn
+}
+
+export async function getPawnForContract(
+  pawnId: number,
+  requestingUser: UserProfile
+): Promise<PawnForContract> {
+  const pawn = await repository.findForContract(pawnId)
+  if (!pawn) throw new NotFoundError('Pawn not found', 'PAWN_NOT_FOUND')
+  if (requestingUser.role !== 'admin' && pawn.user_id !== requestingUser.user_id) {
+    throw new ForbiddenError('You do not have permission to view this pawn', 'FORBIDDEN')
+  }
   return pawn
 }
 

@@ -23,6 +23,10 @@ export interface PawnWithItems extends Pawn {
   items: Item[]
 }
 
+export interface PawnForContract extends PawnWithItems {
+  customer_address: string | null
+}
+
 export interface CreateItemDto {
   description: string          // REQUIRED, non-empty
   appraised_value: number      // REQUIRED, > 0

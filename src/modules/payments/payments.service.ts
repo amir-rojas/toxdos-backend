@@ -4,7 +4,7 @@ import { BadRequestError, NotFoundError, UnprocessableError } from '../../shared
 import type { PaginationParams } from '../../shared/pagination'
 import type { UserProfile } from '../auth/auth.types'
 import * as repository from './payments.repository'
-import type { CreatePaymentDto, Payment } from './payments.types'
+import type { CreatePaymentDto, Payment, PaymentForVoucher } from './payments.types'
 
 export async function createPayment(
   dto: CreatePaymentDto,
@@ -98,6 +98,17 @@ export async function getPaymentById(paymentId: number): Promise<Payment> {
   const payment = await repository.findById(paymentId)
   if (!payment) {
     throw new NotFoundError('Payment not found', 'PAYMENT_NOT_FOUND')
+  }
+  return payment
+}
+
+export async function getPaymentForVoucher(paymentId: number): Promise<PaymentForVoucher> {
+  const payment = await repository.findForVoucher(paymentId)
+  if (!payment) {
+    throw new NotFoundError('Payment not found', 'PAYMENT_NOT_FOUND')
+  }
+  if (payment.payment_type !== 'interest') {
+    throw new BadRequestError('Voucher is only available for interest payments', 'INVALID_PAYMENT_TYPE')
   }
   return payment
 }

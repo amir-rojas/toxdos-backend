@@ -1,7 +1,7 @@
 import { pool } from '../../config/db'
 import type { Item } from '../items/items.types'
 import type { PaginationParams } from '../../shared/pagination'
-import type { CreatePawnDto, Pawn, PawnWithItems } from './pawns.types'
+import type { CreatePawnDto, Pawn, PawnForContract, PawnWithItems } from './pawns.types'
 
 export async function createPawn(
   dto: CreatePawnDto,
@@ -217,6 +217,27 @@ export async function findWithItems(pawnId: number): Promise<PawnWithItems | nul
     `SELECT p.*,
             c.full_name  AS customer_name,
             c.id_number  AS customer_id_number
+     FROM pawns p
+     JOIN customers c ON c.customer_id = p.customer_id
+     WHERE p.pawn_id = $1`,
+    [pawnId]
+  )
+  const pawn = pawnResult.rows[0]
+  if (!pawn) return null
+
+  const itemsResult = await pool.query<Item>(
+    `SELECT * FROM items WHERE pawn_id = $1 ORDER BY item_id ASC`,
+    [pawnId]
+  )
+  return { ...pawn, items: itemsResult.rows }
+}
+
+export async function findForContract(pawnId: number): Promise<PawnForContract | null> {
+  const pawnResult = await pool.query<Pawn & { customer_address: string | null }>(
+    `SELECT p.*,
+            c.full_name  AS customer_name,
+            c.id_number  AS customer_id_number,
+            c.address    AS customer_address
      FROM pawns p
      JOIN customers c ON c.customer_id = p.customer_id
      WHERE p.pawn_id = $1`,

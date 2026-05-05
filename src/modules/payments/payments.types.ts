@@ -12,6 +12,15 @@ export interface Payment {
   customer_name: string | null  // JOIN customers via pawns — null if pawn has no customer
 }
 
+export interface PaymentForVoucher {
+  payment_id: number
+  pawn_id: number
+  payment_type: 'interest' | 'redemption' | 'partial'
+  paid_at: string
+  customer_name: string
+  customer_id_number: string
+}
+
 export interface CreatePaymentDto {
   pawn_id: number
   interest_amount?: number      // >= 0, defaults to 0

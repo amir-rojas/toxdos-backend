@@ -3,6 +3,7 @@ import { AppError } from '../../shared/errors'
 import { parsePagination, buildPaginatedResult } from '../../shared/pagination'
 import { parseId } from '../../shared/parse-id'
 import * as service from './pawns.service'
+import { buildContractHtml } from './pawns.templates'
 import type { CreateItemDto, CreatePawnDto } from './pawns.types'
 
 const ISO_DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/
@@ -110,6 +111,24 @@ export async function getPawnDebt(req: Request, res: Response, next: NextFunctio
     const pawnId = parseId(req.params['id'], 'pawn_id')
     const debt = await service.getPawnDebt(pawnId, req.user!)
     res.status(200).json({ data: debt })
+  } catch (err) {
+    handleError(err, res, next)
+  }
+}
+
+export async function getPawnContract(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const pawnId = parseId(req.params['id'], 'pawn_id')
+    const pawn = await service.getPawnForContract(pawnId, req.user!)
+    const html = buildContractHtml({
+      pawnId:            pawn.pawn_id,
+      customerName:      pawn.customer_name,
+      customerIdNumber:  pawn.customer_id_number,
+      customerAddress:   pawn.customer_address,
+      startDate:         pawn.start_date,
+    })
+    res.setHeader('Content-Type', 'text/html; charset=utf-8')
+    res.send(html)
   } catch (err) {
     handleError(err, res, next)
   }

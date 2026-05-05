@@ -1,6 +1,6 @@
 import { pool } from '../../config/db'
 import type { PaginationParams } from '../../shared/pagination'
-import type { Payment } from './payments.types'
+import type { Payment, PaymentForVoucher } from './payments.types'
 
 export async function create(params: {
   pawnId: number
@@ -92,6 +92,23 @@ export async function create(params: {
 export async function findById(paymentId: number): Promise<Payment | null> {
   const result = await pool.query<Payment>(
     `SELECT * FROM payments WHERE payment_id = $1`,
+    [paymentId]
+  )
+  return result.rows[0] ?? null
+}
+
+export async function findForVoucher(paymentId: number): Promise<PaymentForVoucher | null> {
+  const result = await pool.query<PaymentForVoucher>(
+    `SELECT pay.payment_id,
+            pay.pawn_id,
+            pay.payment_type,
+            pay.paid_at,
+            c.full_name  AS customer_name,
+            c.id_number  AS customer_id_number
+     FROM payments pay
+     JOIN pawns pw ON pw.pawn_id = pay.pawn_id
+     JOIN customers c ON c.customer_id = pw.customer_id
+     WHERE pay.payment_id = $1`,
     [paymentId]
   )
   return result.rows[0] ?? null

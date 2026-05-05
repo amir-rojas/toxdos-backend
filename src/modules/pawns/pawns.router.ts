@@ -7,6 +7,7 @@ const router = Router()
 router.post('/', authenticate, controller.createPawn)
 router.get('/', authenticate, controller.getPawns)
 router.get('/:id/debt', authenticate, controller.getPawnDebt)
+router.get('/:id/contract', authenticate, controller.getPawnContract)
 router.get('/:id', authenticate, controller.getPawnById)
 router.patch('/:id/forfeit', authenticate, controller.forfeitPawn)
 

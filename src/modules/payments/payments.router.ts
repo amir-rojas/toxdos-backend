@@ -6,6 +6,7 @@ const router = Router()
 
 router.post('/', authenticate, controller.createPayment)
 router.get('/', authenticate, controller.getPayments)
+router.get('/:id/voucher', authenticate, controller.getPaymentVoucher)
 router.get('/:id', authenticate, controller.getPaymentById)
 
 export default router

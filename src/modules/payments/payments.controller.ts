@@ -3,6 +3,7 @@ import { AppError } from '../../shared/errors'
 import { parsePagination, buildPaginatedResult } from '../../shared/pagination'
 import { parseId } from '../../shared/parse-id'
 import * as service from './payments.service'
+import { buildVoucherHtml } from './payments.templates'
 import type { CreatePaymentDto } from './payments.types'
 
 const VALID_PAYMENT_TYPES  = ['interest', 'redemption', 'partial'] as const
@@ -101,6 +102,22 @@ export async function getPaymentById(req: Request, res: Response, next: NextFunc
     const paymentId = parseId(req.params['id'], 'payment_id')
     const payment = await service.getPaymentById(paymentId)
     res.status(200).json({ data: payment })
+  } catch (err) {
+    handleError(err, res, next)
+  }
+}
+
+export async function getPaymentVoucher(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const paymentId = parseId(req.params['id'], 'payment_id')
+    const payment = await service.getPaymentForVoucher(paymentId)
+    const html = buildVoucherHtml({
+      customerName:      payment.customer_name,
+      customerIdNumber:  payment.customer_id_number,
+      paidAt:            payment.paid_at,
+    })
+    res.setHeader('Content-Type', 'text/html; charset=utf-8')
+    res.send(html)
   } catch (err) {
     handleError(err, res, next)
   }
