@@ -38,6 +38,7 @@ app.set('trust proxy', 1)
 
 const corsOptions = {
   origin: process.env['ALLOWED_ORIGINS']?.split(',').map(o => o.trim()) ?? 'http://localhost:5173',
+  exposedHeaders: ['RateLimit', 'RateLimit-Policy', 'Retry-After'],
 }
 
 // cors must run before helmet so its headers aren't overridden
