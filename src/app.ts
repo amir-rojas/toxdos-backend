@@ -34,6 +34,7 @@ const FRONTEND_DIST = path.join(__dirname, '../../pawn-pos-frontend/dist')
 const serveFrontend = fs.existsSync(FRONTEND_DIST)
 
 const app = express()
+app.set('trust proxy', 1)
 
 const corsOptions = {
   origin: process.env['ALLOWED_ORIGINS']?.split(',').map(o => o.trim()) ?? 'http://localhost:5173',
