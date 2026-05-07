@@ -1,48 +1,29 @@
 import { pool } from '../../config/db'
+import type { PoolClient } from 'pg'
 import type { PaginationParams } from '../../shared/pagination'
-import type { AccruedCharge, AccrualResult } from './accrued-charges.types'
+import type { AccruedCharge } from './accrued-charges.types'
 
-export async function runDailyAccrual(date: string): Promise<AccrualResult> {
-  // Count active+renewed pawns first
-  const countResult = await pool.query<{ count: string }>(
-    `SELECT COUNT(*) AS count FROM pawns WHERE status IN ('active', 'renewed')`
-  )
-  const processed = parseInt(countResult.rows[0].count, 10)
-
-  // Single INSERT...SELECT — idempotent via ON CONFLICT DO NOTHING
-  // Calculates both interest_amount and custody_amount in one query
-  const insertResult = await pool.query(
-    `INSERT INTO accrued_charges (pawn_id, accrual_date, interest_amount, custody_amount)
+export async function insertCollectedBlocks(
+  client: PoolClient,
+  pawnId: number,
+  paymentId: number,
+  monthsPaid: number,
+  interestPerBlock: number,
+  custodyPerBlock: number,
+  dueDate: string
+): Promise<void> {
+  await client.query(
+    `INSERT INTO accrued_charges (pawn_id, accrual_date, interest_amount, custody_amount, is_collected, payment_id)
      SELECT
-       p.pawn_id,
-       $1::date AS accrual_date,
-       ROUND(
-         CASE p.interest_type
-           WHEN 'daily'   THEN p.loan_amount * p.interest_rate / 100
-           WHEN 'monthly' THEN p.loan_amount * p.interest_rate / 100 / 30
-         END,
-         2
-       ) AS interest_amount,
-       ROUND(
-         CASE p.interest_type
-           WHEN 'daily'   THEN p.loan_amount * p.custody_rate / 100
-           WHEN 'monthly' THEN p.loan_amount * p.custody_rate / 100 / 30
-         END,
-         2
-       ) AS custody_amount
-     FROM pawns p
-     WHERE p.status IN ('active', 'renewed')
-     ON CONFLICT (pawn_id, accrual_date) DO NOTHING`,
-    [date]
+       $1,
+       ($6::date + ((gs.n - 1) * INTERVAL '1 month'))::date,
+       $4,
+       $5,
+       TRUE,
+       $2
+     FROM generate_series(1, $3::int) AS gs(n)`,
+    [pawnId, paymentId, monthsPaid, interestPerBlock, custodyPerBlock, dueDate]
   )
-
-  const inserted = insertResult.rowCount ?? 0
-  return {
-    date,
-    processed,
-    inserted,
-    skipped: processed - inserted,
-  }
 }
 
 export async function findById(accrualId: number): Promise<AccruedCharge | null> {

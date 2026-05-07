@@ -1,21 +1,9 @@
 import { pool } from '../../config/db'
 import type { FinancesSummary } from './finances.types'
 
-const DAILY_INTEREST_EXPR = `
-  CASE p.interest_type
-    WHEN 'daily'   THEN p.loan_amount * p.interest_rate / 100
-    WHEN 'monthly' THEN p.loan_amount * p.interest_rate / 100 / 30
-  END`
-
-const DAILY_CUSTODY_EXPR = `
-  CASE p.interest_type
-    WHEN 'daily'   THEN p.loan_amount * p.custody_rate / 100
-    WHEN 'monthly' THEN p.loan_amount * p.custody_rate / 100 / 30
-  END`
-
 export async function getSummary(): Promise<FinancesSummary> {
   const [activeResult, riskResult, historicalResult] = await Promise.all([
-    // Active pawns: today interest/custody, monthly projection, portfolio stats
+    // Active pawns: monthly interest/custody projection, portfolio stats
     pool.query<{
       today_interest: string
       today_custody: string
@@ -25,8 +13,8 @@ export async function getSummary(): Promise<FinancesSummary> {
       total_deployed_capital: string
     }>(
       `SELECT
-         ROUND(SUM(${DAILY_INTEREST_EXPR}), 2)           AS today_interest,
-         ROUND(SUM(${DAILY_CUSTODY_EXPR}), 2)             AS today_custody,
+         ROUND(SUM(p.loan_amount * p.interest_rate / 100), 2) AS today_interest,
+         ROUND(SUM(p.loan_amount * p.custody_rate  / 100), 2) AS today_custody,
          ROUND(SUM(
            (p.loan_amount * p.interest_rate / 100)
            + (p.loan_amount * p.custody_rate / 100)

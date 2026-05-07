@@ -39,7 +39,10 @@ export async function getSummary(sessionId?: number): Promise<DashboardSummary> 
                 i.description                  AS first_item_description,
                 p.loan_amount::float           AS loan_amount,
                 p.due_date::text               AS due_date,
-                (CURRENT_DATE - p.due_date)    AS days_overdue
+                (
+                  EXTRACT(YEAR  FROM age(CURRENT_DATE, p.due_date)) * 12 +
+                  EXTRACT(MONTH FROM age(CURRENT_DATE, p.due_date))
+                )::int                         AS months_overdue
          FROM pawns p
          JOIN customers c ON c.customer_id = p.customer_id
          LEFT JOIN LATERAL (

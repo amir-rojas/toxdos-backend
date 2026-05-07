@@ -30,26 +30,17 @@ export async function createPayment(req: Request, res: Response, next: NextFunct
       return
     }
 
-    const interestAmount  = body.interest_amount  ?? 0
-    const custodyAmount   = body.custody_amount   ?? 0
-    const principalAmount = body.principal_amount ?? 0
+    if (typeof body.months_paid !== 'number' || !Number.isInteger(body.months_paid) || body.months_paid < 1) {
+      res.status(400).json({ error: 'months_paid is required and must be an integer >= 1', code: 'VALIDATION_ERROR' })
+      return
+    }
 
-    if (typeof interestAmount !== 'number' || interestAmount < 0) {
-      res.status(400).json({ error: 'interest_amount must be >= 0', code: 'VALIDATION_ERROR' })
-      return
-    }
-    if (typeof custodyAmount !== 'number' || custodyAmount < 0) {
-      res.status(400).json({ error: 'custody_amount must be >= 0', code: 'VALIDATION_ERROR' })
-      return
-    }
+    const principalAmount = body.principal_amount ?? 0
     if (typeof principalAmount !== 'number' || principalAmount < 0) {
       res.status(400).json({ error: 'principal_amount must be >= 0', code: 'VALIDATION_ERROR' })
       return
     }
-    if (interestAmount + custodyAmount + principalAmount === 0) {
-      res.status(400).json({ error: 'Payment total must be greater than 0', code: 'VALIDATION_ERROR' })
-      return
-    }
+
     if (body.payment_method && !VALID_PAYMENT_METHODS.includes(body.payment_method as typeof VALID_PAYMENT_METHODS[number])) {
       res.status(400).json({ error: 'payment_method must be "cash", "transfer", or "qr"', code: 'VALIDATION_ERROR' })
       return
@@ -86,12 +77,12 @@ export async function getPayments(req: Request, res: Response, next: NextFunctio
     const paidTo        = (req.query['paid_to']    as string | undefined) || undefined
 
     const pagination = parsePagination(req.query)
-    const { rows, total } = await service.getPayments(
+    const { rows, total, stats } = await service.getPayments(
       req.user!,
       { pawnId, sessionId, search, paymentType, paymentMethod, paidFrom, paidTo },
       pagination
     )
-    res.status(200).json(buildPaginatedResult(rows, total, pagination))
+    res.status(200).json({ ...buildPaginatedResult(rows, total, pagination), stats })
   } catch (err) {
     handleError(err, res, next)
   }

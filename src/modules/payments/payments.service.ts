@@ -1,5 +1,5 @@
 import { findOpenByUserId } from '../cash-sessions/cash-sessions.repository'
-import { findById as findPawnById } from '../pawns/pawns.repository'
+import { findById as findPawnById, findDebt } from '../pawns/pawns.repository'
 import { BadRequestError, NotFoundError, UnprocessableError } from '../../shared/errors'
 import type { PaginationParams } from '../../shared/pagination'
 import type { UserProfile } from '../auth/auth.types'
@@ -33,11 +33,25 @@ export async function createPayment(
     )
   }
 
-  const interestAmount  = dto.interest_amount  ?? 0
-  const custodyAmount   = dto.custody_amount   ?? 0
+  // BR-4: validate months_paid against blocks_due
+  const debt = await findDebt(dto.pawn_id)
+  if (!debt) {
+    throw new NotFoundError('Pawn debt information not found', 'PAWN_NOT_FOUND')
+  }
+  if (dto.months_paid > debt.blocks_due) {
+    throw new BadRequestError(
+      `months_paid (${dto.months_paid}) exceeds blocks due (${debt.blocks_due})`,
+      'MONTHS_PAID_EXCEEDS_BLOCKS_DUE'
+    )
+  }
+
+  // BR-5: redemptions always charge all overdue blocks — ignore user-supplied months_paid
+  const monthsPaid = dto.payment_type === 'redemption' ? debt.blocks_due : dto.months_paid
+
+  const interestAmount  = debt.interest_per_block * monthsPaid
+  const custodyAmount   = debt.custody_per_block  * monthsPaid
   const principalAmount = dto.principal_amount ?? 0
 
-  // Resolve movement category for interest/redemption leg
   const movementCategory: 'interest_payment' | 'redemption' =
     dto.payment_type === 'redemption' ? 'redemption' : 'interest_payment'
 
@@ -49,18 +63,19 @@ export async function createPayment(
     : interestAmount
 
   return repository.create({
-    pawnId:             dto.pawn_id,
-    sessionId:          session.session_id,
-    userId:             requestingUser.user_id,
+    pawnId:        dto.pawn_id,
+    sessionId:     session.session_id,
+    userId:        requestingUser.user_id,
     interestAmount,
     custodyAmount,
     principalAmount,
-    paymentType:        dto.payment_type,
-    paymentMethod:      dto.payment_method ?? 'cash',
+    monthsPaid,
+    dueDate:       pawn.due_date,
+    paymentType:   dto.payment_type,
+    paymentMethod: dto.payment_method ?? 'cash',
     movementCategory,
     movementAmount,
     isRedemption,
-    markAccruedCharges: interestAmount > 0 || custodyAmount > 0,
   })
 }
 
@@ -76,7 +91,7 @@ export async function getPayments(
     paidTo?: string
   },
   pagination: PaginationParams
-): Promise<{ rows: Payment[]; total: number }> {
+): Promise<{ rows: Payment[]; total: number; stats: { collected_today: string; count_today: number } }> {
   const repoFilters: Parameters<typeof repository.findAll>[0] = {
     pawnId:        filters.pawnId,
     sessionId:     filters.sessionId,

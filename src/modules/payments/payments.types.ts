@@ -23,10 +23,9 @@ export interface PaymentForVoucher {
 }
 
 export interface CreatePaymentDto {
-  pawn_id: number
-  interest_amount?: number      // >= 0, defaults to 0
-  custody_amount?: number       // >= 0, defaults to 0
-  principal_amount?: number     // >= 0, defaults to 0
-  payment_type: 'interest' | 'redemption' | 'partial'
-  payment_method?: 'cash' | 'transfer' | 'qr'
+  pawn_id:           number
+  months_paid:       number
+  principal_amount?: number     // >= 0, defaults to 0 (redemption only)
+  payment_type:      'interest' | 'redemption' | 'partial'
+  payment_method?:   'cash' | 'transfer' | 'qr'
 }

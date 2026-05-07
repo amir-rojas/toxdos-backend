@@ -4,7 +4,7 @@ import { BadRequestError, ForbiddenError, NotFoundError, UnprocessableError } fr
 import type { PaginationParams } from '../../shared/pagination'
 import type { UserProfile } from '../auth/auth.types'
 import * as repository from './pawns.repository'
-import type { CreatePawnDto, Pawn, PawnForContract, PawnWithItems } from './pawns.types'
+import type { CreatePawnDto, Pawn, PawnDebt, PawnForContract, PawnWithItems } from './pawns.types'
 
 export async function createPawn(
   dto: CreatePawnDto,
@@ -53,7 +53,7 @@ export async function getPawns(
 export async function getPawnDebt(
   pawnId: number,
   requestingUser: UserProfile
-): Promise<{ interest_amount: number; custody_amount: number; loan_amount: number }> {
+): Promise<PawnDebt> {
   const pawn = await repository.findById(pawnId)
   if (!pawn) {
     throw new NotFoundError('Pawn not found', 'PAWN_NOT_FOUND')

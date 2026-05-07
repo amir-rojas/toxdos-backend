@@ -4,7 +4,7 @@ export interface OverduePawnRow {
   first_item_description: string
   loan_amount: number
   due_date: string
-  days_overdue: number
+  months_overdue: number
 }
 
 export interface AvailableItemRow {

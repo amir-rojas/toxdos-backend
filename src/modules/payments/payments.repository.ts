@@ -1,6 +1,7 @@
 import { pool } from '../../config/db'
 import type { PaginationParams } from '../../shared/pagination'
 import type { Payment, PaymentForVoucher } from './payments.types'
+import { insertCollectedBlocks } from '../accrued-charges/accrued-charges.repository'
 
 export async function create(params: {
   pawnId: number
@@ -9,12 +10,13 @@ export async function create(params: {
   interestAmount: number
   custodyAmount: number
   principalAmount: number
+  monthsPaid: number
+  dueDate: string
   paymentType: 'interest' | 'redemption' | 'partial'
   paymentMethod: 'cash' | 'transfer' | 'qr'
   movementCategory: 'interest_payment' | 'redemption'
   movementAmount: number
   isRedemption: boolean
-  markAccruedCharges: boolean
 }): Promise<Payment> {
   const client = await pool.connect()
   try {
@@ -72,22 +74,23 @@ export async function create(params: {
       await client.query(
         `UPDATE pawns
          SET status = 'renewed',
-             due_date = due_date + INTERVAL '1 month',
+             due_date = due_date + ($1 * INTERVAL '1 month'),
              updated_at = now()
-         WHERE pawn_id = $1`,
-        [params.pawnId]
+         WHERE pawn_id = $2`,
+        [params.monthsPaid, params.pawnId]
       )
     }
 
-    // 5. Mark uncollected accrued charges as collected
-    if (params.markAccruedCharges) {
-      await client.query(
-        `UPDATE accrued_charges
-         SET is_collected = true, payment_id = $1
-         WHERE pawn_id = $2 AND is_collected = false`,
-        [payment.payment_id, params.pawnId]
-      )
-    }
+    // 5. Insert collected audit rows — one per block paid
+    await insertCollectedBlocks(
+      client,
+      params.pawnId,
+      payment.payment_id,
+      params.monthsPaid,
+      params.interestAmount,
+      params.custodyAmount,
+      params.dueDate
+    )
 
     await client.query('COMMIT')
     return payment
@@ -137,7 +140,7 @@ export async function findAll(
     paidTo?: string
   },
   pagination: PaginationParams
-): Promise<{ rows: Payment[]; total: number }> {
+): Promise<{ rows: Payment[]; total: number; stats: { collected_today: string; count_today: number } }> {
   const conditions: string[] = []
   const values: unknown[] = []
   let idx = 1
@@ -181,7 +184,7 @@ export async function findAll(
   const where = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : ''
   const offset = (pagination.page - 1) * pagination.limit
 
-  const [dataResult, countResult] = await Promise.all([
+  const [dataResult, countResult, statsResult] = await Promise.all([
     pool.query<Payment>(
       `SELECT p.*,
               c.full_name AS customer_name
@@ -202,10 +205,21 @@ export async function findAll(
        ${where}`,
       values
     ),
+    pool.query<{ collected_today: string; count_today: string }>(
+      `SELECT COALESCE(SUM(p.total), 0)::text AS collected_today,
+              COUNT(*) AS count_today
+       FROM payments p
+       WHERE p.paid_at::date = CURRENT_DATE`,
+      []
+    ),
   ])
 
   return {
     rows: dataResult.rows,
     total: parseInt(countResult.rows[0].count, 10),
+    stats: {
+      collected_today: statsResult.rows[0].collected_today,
+      count_today: parseInt(statsResult.rows[0].count_today, 10),
+    },
   }
 }

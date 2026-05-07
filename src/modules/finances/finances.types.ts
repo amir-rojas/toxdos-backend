@@ -1,5 +1,5 @@
 export interface FinancesSummary {
-  // Hoy
+  // Proyección mensual (ingreso estimado si todos los empeños activos renuevan hoy)
   today_interest: number
   today_custody: number
 

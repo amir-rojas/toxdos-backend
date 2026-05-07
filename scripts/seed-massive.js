@@ -2,13 +2,11 @@
 const { Pool } = require('pg')
 const { faker } = require('@faker-js/faker')
 
-const pool = new Pool({
-  host: 'localhost',
-  port: 5432,
-  user: 'postgres',
-  password: 'postgre',
-  database: 'pawn-db',
-})
+const pool = new Pool(
+  process.env.DATABASE_URL
+    ? { connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } }
+    : { host: 'localhost', port: 5432, user: 'postgres', password: 'postgre', database: 'pawn-db' }
+)
 
 // ── Config ─────────────────────────────────────────────────────────────────────
 const ADMIN_ID   = 1
@@ -88,7 +86,7 @@ const EXPENSE_CONCEPTS = [
 ]
 
 const PAY_METHODS    = ['cash', 'cash', 'cash', 'transfer', 'qr']
-const INT_TYPES      = ['monthly', 'monthly', 'monthly', 'daily']
+const INT_TYPES      = ['monthly']
 const STATUS_DIST    = [
   ...Array(40).fill('active'),
   ...Array(20).fill('renewed'),
@@ -103,6 +101,16 @@ async function seed() {
   const today = new Date()
 
   try {
+    // ── 0. Cleanup ─────────────────────────────────────────────────────────────
+    process.stdout.write('0/8 Limpiando tablas... ')
+    await client.query(`
+      TRUNCATE TABLE
+        accrued_charges, payments, movements, expenses, sales,
+        items, pawns, customers, categories
+      RESTART IDENTITY CASCADE
+    `)
+    console.log('✓')
+
     // ── 1. Categories ──────────────────────────────────────────────────────────
     process.stdout.write('1/8 Categorías... ')
     const { ph: catPh, params: catP } = bv(CATEGORY_NAMES.map(n => [n]))
@@ -185,8 +193,15 @@ async function seed() {
 
         let startDate, dueDate
         if (status === 'active' || status === 'renewed') {
-          startDate = addDays(sessDate, -rInt(1, 45))
-          dueDate   = addDays(today, rInt(5, 30))
+          const scenario = Math.random()
+          if (scenario < 0.40) {
+            dueDate   = addDays(today, rInt(5, 30))     // current: vence en el futuro
+          } else if (scenario < 0.70) {
+            dueDate   = addDays(today, -rInt(5, 35))    // 1 bloque vencido (~1 mes)
+          } else {
+            dueDate   = addDays(today, -rInt(36, 90))   // 2-3 bloques vencidos
+          }
+          startDate = addDays(dueDate, -rInt(15, 45))  // siempre antes de dueDate
         } else {
           startDate = addDays(sessDate, -rInt(30, 180))
           dueDate   = addDays(startDate, rInt(15, 60))

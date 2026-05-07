@@ -12,14 +12,8 @@ function handleError(err: unknown, res: Response, next: NextFunction): void {
   next(err)
 }
 
-export async function runAccrual(_req: Request, res: Response, next: NextFunction): Promise<void> {
-  try {
-    const today = new Date().toISOString().split('T')[0] as string
-    const result = await repository.runDailyAccrual(today)
-    res.status(200).json({ data: result })
-  } catch (err) {
-    handleError(err, res, next)
-  }
+export async function runAccrual(_req: Request, res: Response, _next: NextFunction): Promise<void> {
+  res.status(200).json({ data: { message: 'no-op' } })
 }
 
 export async function getAccruedCharges(req: Request, res: Response, next: NextFunction): Promise<void> {

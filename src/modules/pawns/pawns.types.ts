@@ -27,6 +27,13 @@ export interface PawnForContract extends PawnWithItems {
   customer_address: string | null
 }
 
+export interface PawnDebt {
+  loan_amount:        number
+  interest_per_block: number
+  custody_per_block:  number
+  blocks_due:         number
+}
+
 export interface CreateItemDto {
   description: string          // REQUIRED, non-empty
   appraised_value: number      // REQUIRED, > 0

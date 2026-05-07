@@ -1,7 +1,7 @@
 import { pool } from '../../config/db'
 import type { Item } from '../items/items.types'
 import type { PaginationParams } from '../../shared/pagination'
-import type { CreatePawnDto, Pawn, PawnForContract, PawnWithItems } from './pawns.types'
+import type { CreatePawnDto, Pawn, PawnDebt, PawnForContract, PawnWithItems } from './pawns.types'
 
 export async function createPawn(
   dto: CreatePawnDto,
@@ -147,68 +147,36 @@ export async function findById(pawnId: number): Promise<Pawn | null> {
   return result.rows[0] ?? null
 }
 
-export async function findDebt(pawnId: number): Promise<{
-  interest_amount: number
-  custody_amount: number
-  loan_amount: number
-} | null> {
-  // Lazy evaluation: generate any missing accrued_charges rows for this pawn
-  // Starts from MAX(accrual_date) + 1 (not start_date) — skips already-existing rows entirely
-  // ON CONFLICT DO NOTHING makes this idempotent; safe to call on every /debt request
-  await pool.query(
-    `INSERT INTO accrued_charges (pawn_id, accrual_date, interest_amount, custody_amount)
-     SELECT
-       p.pawn_id,
-       d::date,
-       ROUND(
-         CASE p.interest_type
-           WHEN 'daily'   THEN p.loan_amount * p.interest_rate / 100
-           WHEN 'monthly' THEN p.loan_amount * p.interest_rate / 100 / 30
-         END, 2
-       ),
-       ROUND(
-         CASE p.interest_type
-           WHEN 'daily'   THEN p.loan_amount * p.custody_rate / 100
-           WHEN 'monthly' THEN p.loan_amount * p.custody_rate / 100 / 30
-         END, 2
-       )
-     FROM pawns p
-     CROSS JOIN generate_series(
-       COALESCE(
-         (SELECT (MAX(accrual_date) + 1)::date FROM accrued_charges WHERE pawn_id = $1),
-         p.start_date
-       ),
-       current_date,
-       '1 day'::interval
-     ) AS d
-     WHERE p.pawn_id = $1 AND p.status IN ('active', 'renewed')
-     ON CONFLICT (pawn_id, accrual_date) DO NOTHING`,
-    [pawnId]
-  )
-
-  // Now sum all uncollected charges (includes today)
+export async function findDebt(pawnId: number): Promise<PawnDebt | null> {
   const result = await pool.query<{
-    loan_amount: string
-    interest_amount: string
-    custody_amount: string
+    loan_amount:        string
+    interest_per_block: string
+    custody_per_block:  string
+    blocks_due:         string
   }>(
     `SELECT
        p.loan_amount,
-       COALESCE(SUM(ac.interest_amount), 0) AS interest_amount,
-       COALESCE(SUM(ac.custody_amount),  0) AS custody_amount
+       ROUND(p.loan_amount * p.interest_rate / 100, 2) AS interest_per_block,
+       ROUND(p.loan_amount * p.custody_rate  / 100, 2) AS custody_per_block,
+       GREATEST(1,
+         CASE WHEN CURRENT_DATE <= p.due_date THEN 1
+         ELSE
+           (EXTRACT(YEAR  FROM age(CURRENT_DATE, p.due_date)) * 12 +
+            EXTRACT(MONTH FROM age(CURRENT_DATE, p.due_date)))::int +
+           CASE WHEN EXTRACT(DAY FROM age(CURRENT_DATE, p.due_date)) > 0 THEN 1 ELSE 0 END
+         END
+       ) AS blocks_due
      FROM pawns p
-     LEFT JOIN accrued_charges ac
-       ON ac.pawn_id = p.pawn_id AND ac.is_collected = false
-     WHERE p.pawn_id = $1
-     GROUP BY p.pawn_id, p.loan_amount`,
+     WHERE p.pawn_id = $1 AND p.status IN ('active', 'renewed')`,
     [pawnId]
   )
   if (!result.rows[0]) return null
   const row = result.rows[0]
   return {
-    interest_amount: parseFloat(row.interest_amount),
-    custody_amount:  parseFloat(row.custody_amount),
-    loan_amount:     parseFloat(row.loan_amount),
+    loan_amount:        parseFloat(row.loan_amount),
+    interest_per_block: parseFloat(row.interest_per_block),
+    custody_per_block:  parseFloat(row.custody_per_block),
+    blocks_due:         parseInt(row.blocks_due, 10),
   }
 }
 
