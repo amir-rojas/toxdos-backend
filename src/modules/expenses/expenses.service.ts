@@ -29,7 +29,7 @@ export async function getExpenses(
   requestingUser: UserProfile,
   filters: { sessionId?: number; dateFrom?: string; dateTo?: string },
   pagination: PaginationParams
-): Promise<{ rows: Expense[]; total: number }> {
+): Promise<{ rows: Expense[]; total: number; stats: { total_amount: string } }> {
   return repository.findAll(
     {
       sessionId: filters.sessionId,

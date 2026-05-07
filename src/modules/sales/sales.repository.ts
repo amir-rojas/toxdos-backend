@@ -66,7 +66,7 @@ export async function findAll(
     userId?: number
   },
   pagination: PaginationParams
-): Promise<{ rows: SaleEnriched[]; total: number }> {
+): Promise<{ rows: SaleEnriched[]; total: number; stats: { sold_today: string; count_today: number } }> {
   const conditions: string[] = []
   const values: unknown[] = []
   let idx = 1
@@ -88,7 +88,7 @@ export async function findAll(
   const where = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : ''
   const offset = (pagination.page - 1) * pagination.limit
 
-  const [dataResult, countResult] = await Promise.all([
+  const [dataResult, countResult, statsResult] = await Promise.all([
     pool.query<SaleEnriched>(
       `SELECT s.*,
               i.description AS item_description,
@@ -112,10 +112,22 @@ export async function findAll(
        ${where}`,
       values
     ),
+    pool.query<{ sold_today: string; count_today: string }>(
+      `SELECT COALESCE(SUM(s.sale_price), 0)::text AS sold_today,
+              COUNT(*) AS count_today
+       FROM sales s
+       JOIN items i ON i.item_id = s.item_id
+       WHERE s.sold_at::date = CURRENT_DATE`,
+      []
+    ),
   ])
 
   return {
     rows: dataResult.rows,
     total: parseInt(countResult.rows[0].count, 10),
+    stats: {
+      sold_today: statsResult.rows[0].sold_today,
+      count_today: parseInt(statsResult.rows[0].count_today, 10),
+    },
   }
 }

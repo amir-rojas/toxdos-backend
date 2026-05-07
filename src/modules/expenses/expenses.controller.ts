@@ -39,8 +39,8 @@ export async function getExpenses(req: Request, res: Response, next: NextFunctio
     const dateFrom = req.query['date_from'] as string | undefined
     const dateTo   = req.query['date_to']   as string | undefined
     const pagination = parsePagination(req.query)
-    const { rows, total } = await service.getExpenses(req.user!, { sessionId, dateFrom, dateTo }, pagination)
-    res.status(200).json(buildPaginatedResult(rows, total, pagination))
+    const { rows, total, stats } = await service.getExpenses(req.user!, { sessionId, dateFrom, dateTo }, pagination)
+    res.status(200).json({ ...buildPaginatedResult(rows, total, pagination), stats })
   } catch (err) {
     handleError(err, res, next)
   }

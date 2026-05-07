@@ -43,8 +43,8 @@ export async function getSales(req: Request, res: Response, next: NextFunction):
   try {
     const sessionId = req.query['session_id'] ? parseId(req.query['session_id'] as string, 'session_id') : undefined
     const pagination = parsePagination(req.query)
-    const { rows, total } = await service.getSales(req.user!, { sessionId }, pagination)
-    res.status(200).json(buildPaginatedResult(rows, total, pagination))
+    const { rows, total, stats } = await service.getSales(req.user!, { sessionId }, pagination)
+    res.status(200).json({ ...buildPaginatedResult(rows, total, pagination), stats })
   } catch (err) {
     handleError(err, res, next)
   }

@@ -52,7 +52,7 @@ export async function findAll(
     dateTo?: string
   },
   pagination: PaginationParams
-): Promise<{ rows: Expense[]; total: number }> {
+): Promise<{ rows: Expense[]; total: number; stats: { total_amount: string } }> {
   const conditions: string[] = []
   const values: unknown[] = []
   let idx = 1
@@ -80,7 +80,7 @@ export async function findAll(
   const where = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : ''
   const offset = (pagination.page - 1) * pagination.limit
 
-  const [dataResult, countResult] = await Promise.all([
+  const [dataResult, countResult, statsResult] = await Promise.all([
     pool.query<Expense>(
       `SELECT e.* FROM expenses e ${join} ${where} ORDER BY e.created_at DESC LIMIT $${idx} OFFSET $${idx + 1}`,
       [...values, pagination.limit, offset]
@@ -89,10 +89,15 @@ export async function findAll(
       `SELECT COUNT(*) FROM expenses e ${join} ${where}`,
       values
     ),
+    pool.query<{ total_amount: string }>(
+      `SELECT COALESCE(SUM(amount), 0)::text AS total_amount FROM expenses e ${join} ${where}`,
+      values
+    ),
   ])
 
   return {
     rows: dataResult.rows,
     total: parseInt(countResult.rows[0].count, 10),
+    stats: { total_amount: statsResult.rows[0].total_amount },
   }
 }

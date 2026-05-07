@@ -41,7 +41,7 @@ export async function getSales(
   requestingUser: UserProfile,
   filters: { sessionId?: number },
   pagination: PaginationParams
-): Promise<{ rows: Sale[]; total: number }> {
+): Promise<{ rows: Sale[]; total: number; stats: { sold_today: string; count_today: number } }> {
   return repository.findAll(
     {
       sessionId: filters.sessionId,
