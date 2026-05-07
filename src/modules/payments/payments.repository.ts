@@ -118,11 +118,15 @@ export async function findForVoucher(paymentId: number): Promise<PaymentForVouch
             pay.paid_at,
             pw.due_date  AS pawn_due_date,
             c.full_name  AS customer_name,
-            c.id_number  AS customer_id_number
+            c.id_number  AS customer_id_number,
+            GREATEST(COUNT(ac.accrual_id)::int, 1) AS months_paid
      FROM payments pay
      JOIN pawns pw ON pw.pawn_id = pay.pawn_id
      JOIN customers c ON c.customer_id = pw.customer_id
-     WHERE pay.payment_id = $1`,
+     LEFT JOIN accrued_charges ac ON ac.payment_id = pay.payment_id
+     WHERE pay.payment_id = $1
+     GROUP BY pay.payment_id, pay.pawn_id, pay.payment_type, pay.paid_at,
+              pw.due_date, c.full_name, c.id_number`,
     [paymentId]
   )
   return result.rows[0] ?? null

@@ -20,6 +20,7 @@ export interface PaymentForVoucher {
   pawn_due_date: string
   customer_name: string
   customer_id_number: string
+  months_paid: number
 }
 
 export interface CreatePaymentDto {

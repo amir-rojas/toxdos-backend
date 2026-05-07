@@ -15,9 +15,9 @@ function fmtShort(isoDatetime: string | Date): string {
   return `${day}/${month}/${year}`
 }
 
-function addOneMonth(isoDatetime: string | Date): string {
+function subtractMonths(isoDatetime: string | Date, months: number): string {
   const d = new Date(isoDatetime)
-  d.setUTCMonth(d.getUTCMonth() + 1)
+  d.setUTCMonth(d.getUTCMonth() - months)
   return fmtShort(d.toISOString())
 }
 
@@ -26,11 +26,14 @@ export function buildVoucherHtml(data: {
   customerIdNumber: string
   paidAt: string | Date
   pawnDueDate: string | Date
+  monthsPaid: number
 }): string {
   const name  = esc(data.customerName)
   const ci    = esc(data.customerIdNumber)
-  const since = fmtShort(data.pawnDueDate)
-  const until = addOneMonth(data.pawnDueDate)
+  // since = inicio del bloque pagado (due_date anterior al pago)
+  // until = fin del bloque pagado (due_date actual, ya extendido por el pago)
+  const since = subtractMonths(data.pawnDueDate, data.monthsPaid)
+  const until = fmtShort(data.pawnDueDate)
 
   return `<!DOCTYPE html>
 <html lang="es">
