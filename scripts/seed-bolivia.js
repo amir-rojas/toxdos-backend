@@ -48,7 +48,7 @@ const NOMBRES_M = [
   'Rodrigo', 'Marco', 'Ramiro', 'Nelson', 'Héctor', 'Edwin', 'Freddy',
   'Rolando', 'Raúl', 'Álvaro', 'Gabriel', 'Diego', 'Roberto', 'Fernando',
   'Germán', 'Walter', 'Gustavo', 'Alejandro', 'Erick', 'Boris', 'Willy',
-  'Jhonny', 'Jhon', 'Richard', 'Rubén', 'Víctor', 'Marcelo', 'Iván',
+  'Jhonny', 'Richard', 'Rubén', 'Víctor', 'Marcelo', 'Iván', 'Wilson',
 ]
 
 const NOMBRES_F = [
@@ -115,52 +115,286 @@ const CATEGORY_NAMES = [
   'Vehículos y Accesorios',
 ]
 
+// Artículos realistas para el mercado boliviano
 const ITEMS_BY_CAT = {
-  'Celulares y Smartphones':     [['Smartphone','Samsung'],['Smartphone','Apple'],['Smartphone','Xiaomi'],['Smartphone','Motorola'],['Teléfono básico','Nokia'],['Smartphone','Huawei'],['Smartphone','Tecno']],
-  'Laptops y Computadoras':      [['Laptop','Dell'],['Laptop','HP'],['Laptop','Lenovo'],['MacBook','Apple'],['Laptop','Toshiba'],['PC de escritorio','Sin marca']],
-  'Tablets y Lectores':          [['Tablet','Samsung'],['iPad','Apple'],['Tablet','Lenovo'],['Tablet','Huawei']],
-  'Televisores y Monitores':     [['Smart TV 32"','Samsung'],['Smart TV 40"','LG'],['Smart TV 43"','TCL'],['Monitor LCD','AOC'],['TV convencional','Sin marca']],
-  'Consolas y Videojuegos':      [['PlayStation 4','Sony'],['Nintendo Switch','Nintendo'],['PlayStation 5','Sony'],['Xbox One','Microsoft'],['Juegos variados','Sin marca']],
-  'Cámaras y Fotografía':        [['Cámara digital','Canon'],['Cámara semiprofesional','Nikon'],['Cámara de acción','GoPro'],['Videocámara','Sony']],
-  'Audio y Parlantes':           [['Parlante bluetooth','JBL'],['Parlante portátil','Sony'],['Auriculares','Sony'],['Auriculares','Beats'],['Equipo de sonido','LG']],
-  'Electrodomésticos':           [['Licuadora','Oster'],['Microondas','LG'],['Plancha a vapor','Philips'],['Ventilador','Sin marca'],['Cafetera','Black&Decker'],['Sandwichera','Imaco'],['Arrocera','Imaco']],
-  'Joyería de Oro':              [['Anillo de oro 18k','Sin marca'],['Cadena de oro 14k','Sin marca'],['Pulsera de oro','Sin marca'],['Aretes de oro','Sin marca'],['Dije de oro','Sin marca'],['Gargantilla de oro','Sin marca']],
-  'Joyería de Plata':            [['Collar de plata','Sin marca'],['Pulsera de plata','Sin marca'],['Anillo de plata','Sin marca'],['Aretes de plata','Sin marca'],['Cadena de plata','Sin marca']],
-  'Relojes':                     [['Reloj de pulsera','Casio'],['Reloj de pulsera','Seiko'],['Reloj de pulsera','Citizen'],['Smartwatch','Samsung'],['Reloj de pared','Sin marca']],
-  'Lentes y Óptica':             [['Anteojos con graduación','Sin marca'],['Lentes de sol','Ray-Ban'],['Lentes de sol','Sin marca'],['Binoculares','Sin marca']],
-  'Herramientas Eléctricas':     [['Taladro eléctrico','Bosch'],['Amoladora angular','Dewalt'],['Taladro percutor','Black&Decker'],['Sierra caladora','Skil']],
-  'Herramientas Manuales':       [['Caja de herramientas','Stanley'],['Llave inglesa','Sin marca'],['Set de llaves','Stanley'],['Nivel de burbuja','Sin marca']],
-  'Equipos de Construcción':     [['Mezcladora de concreto','Sin marca'],['Compresor de aire','Sin marca'],['Generador eléctrico','Sin marca']],
-  'Artículos Deportivos':        [['Mancuernas','Sin marca'],['Casco de ciclismo','Sin marca'],['Balón de fútbol','Adidas'],['Raqueta de tenis','Wilson'],['Equipo de natación','Sin marca']],
-  'Bicicletas':                  [['Bicicleta de montaña','Sin marca'],['Bicicleta urbana','Sin marca'],['Bicicleta BMX','Sin marca'],['Bicicleta para niño','Sin marca']],
-  'Instrumentos Musicales':      [['Guitarra acústica','Yamaha'],['Guitarra eléctrica','Fender'],['Teclado','Casio'],['Charango','Sin marca'],['Zampoña','Sin marca']],
-  'Ropa y Calzado':              [['Zapatillas','Nike'],['Zapatillas','Adidas'],['Botas de cuero','Sin marca'],['Campera de cuero','Sin marca'],['Ropa deportiva','Under Armour']],
-  'Bolsos y Carteras':           [['Mochila','Sin marca'],['Bolso de mano','Sin marca'],['Cartera de cuero','Sin marca'],['Maletín','Sin marca']],
-  'Artículos de Cocina':         [['Juego de ollas','Sin marca'],['Sartén de teflón','Sin marca'],['Procesador de alimentos','Oster'],['Cuchillería','Sin marca']],
-  'Muebles y Decoración':        [['Cuadro decorativo','Sin marca'],['Espejo decorativo','Sin marca'],['Lámpara de mesa','Sin marca'],['Alfombra','Sin marca']],
-  'Antigüedades y Arte':         [['Figura de cerámica','Sin marca'],['Monedas antiguas','Sin marca'],['Cuadro antiguo','Sin marca'],['Objeto de plata colonial','Sin marca']],
-  'Coleccionables':              [['Figura coleccionable','Sin marca'],['Tarjetas de fútbol','Sin marca'],['Álbum de figuritas','Sin marca']],
-  'Libros y Material Educativo': [['Libros de texto','Sin marca'],['Enciclopedia','Sin marca'],['Material de dibujo técnico','Sin marca']],
-  'Vehículos y Accesorios':      [['Casco de moto','Sin marca'],['Autorradio','Pioneer'],['GPS vehicular','Garmin'],['Repuesto de moto','Sin marca']],
+  'Celulares y Smartphones': [
+    ['Samsung Galaxy A14', 'Samsung'],
+    ['Samsung Galaxy A34', 'Samsung'],
+    ['Samsung Galaxy A54', 'Samsung'],
+    ['Samsung Galaxy A24', 'Samsung'],
+    ['Samsung Galaxy S21 FE', 'Samsung'],
+    ['Xiaomi Redmi Note 12', 'Xiaomi'],
+    ['Xiaomi Redmi Note 13', 'Xiaomi'],
+    ['Xiaomi Redmi 12C', 'Xiaomi'],
+    ['Xiaomi Redmi 13C', 'Xiaomi'],
+    ['Motorola Moto G54', 'Motorola'],
+    ['Motorola Moto G84', 'Motorola'],
+    ['Motorola Moto G23', 'Motorola'],
+    ['iPhone 11', 'Apple'],
+    ['iPhone 12', 'Apple'],
+    ['iPhone XR', 'Apple'],
+    ['Huawei Y9s', 'Huawei'],
+    ['Tecno Spark 10', 'Tecno'],
+  ],
+  'Laptops y Computadoras': [
+    ['HP Pavilion 15', 'HP'],
+    ['HP Laptop 15s', 'HP'],
+    ['HP 240 G8', 'HP'],
+    ['Dell Inspiron 15', 'Dell'],
+    ['Dell Latitude 3420', 'Dell'],
+    ['Lenovo IdeaPad 3', 'Lenovo'],
+    ['Lenovo IdeaPad Slim 5', 'Lenovo'],
+    ['ASUS VivoBook 15', 'ASUS'],
+    ['Acer Aspire 5', 'Acer'],
+    ['MacBook Air M1', 'Apple'],
+    ['PC de escritorio ensamblado', 'Sin marca'],
+  ],
+  'Tablets y Lectores': [
+    ['Samsung Galaxy Tab A8', 'Samsung'],
+    ['Samsung Galaxy Tab A7 Lite', 'Samsung'],
+    ['iPad 9na generación', 'Apple'],
+    ['Lenovo Tab M10', 'Lenovo'],
+    ['Huawei MatePad T10', 'Huawei'],
+    ['Amazon Fire HD 8', 'Amazon'],
+  ],
+  'Televisores y Monitores': [
+    ['Smart TV 32" LED', 'TCL'],
+    ['Smart TV 40" LED', 'TCL'],
+    ['Smart TV 43" 4K', 'Hisense'],
+    ['Smart TV 32" Full HD', 'Samsung'],
+    ['Smart TV 40" Full HD', 'LG'],
+    ['Monitor LED 21.5"', 'AOC'],
+    ['Monitor LED 24"', 'LG'],
+    ['TV 29" convencional', 'Sin marca'],
+  ],
+  'Consolas y Videojuegos': [
+    ['PlayStation 4 Slim', 'Sony'],
+    ['PlayStation 4 Pro', 'Sony'],
+    ['Nintendo Switch', 'Nintendo'],
+    ['Nintendo Switch Lite', 'Nintendo'],
+    ['Xbox One S', 'Microsoft'],
+    ['PlayStation 5 Digital', 'Sony'],
+  ],
+  'Cámaras y Fotografía': [
+    ['Cámara digital compacta', 'Canon'],
+    ['Cámara semiprofesional EOS', 'Canon'],
+    ['Cámara réflex D3500', 'Nikon'],
+    ['Cámara bridge', 'Sony'],
+    ['Videocámara HD', 'Sony'],
+    ['Cámara de acción Hero 7', 'GoPro'],
+  ],
+  'Audio y Parlantes': [
+    ['Parlante bluetooth portátil', 'JBL'],
+    ['Parlante Clip 3', 'JBL'],
+    ['Parlante Flip 5', 'JBL'],
+    ['Auriculares inalámbricos WH-CH520', 'Sony'],
+    ['Auriculares Tune 510BT', 'JBL'],
+    ['Auriculares básicos', 'Sin marca'],
+    ['Equipo de sonido minicomponente', 'LG'],
+    ['Parlante bluetooth pequeño', 'Sony'],
+  ],
+  'Electrodomésticos': [
+    ['Licuadora 3 velocidades', 'Oster'],
+    ['Licuadora de vaso', 'Black+Decker'],
+    ['Microondas 20L', 'LG'],
+    ['Microondas 23L', 'Samsung'],
+    ['Plancha a vapor', 'Philips'],
+    ['Ventilador de pie', 'Sin marca'],
+    ['Cafetera eléctrica', 'Imaco'],
+    ['Sandwichera eléctrica', 'Imaco'],
+    ['Arrocera 1.8L', 'Imaco'],
+    ['Freidora de aire 3.5L', 'Sin marca'],
+  ],
+  'Joyería de Oro': [
+    ['Anillo solitario de oro 18k', 'Sin marca'],
+    ['Anillo de oro 18k con brillante', 'Sin marca'],
+    ['Anillo de oro 14k liso', 'Sin marca'],
+    ['Cadena de oro 14k tejido bismark', 'Sin marca'],
+    ['Cadena de oro 18k tejido cartier', 'Sin marca'],
+    ['Cadena de oro 18k fígaro', 'Sin marca'],
+    ['Pulsera de oro 18k esclava', 'Sin marca'],
+    ['Pulsera de oro 14k tejido', 'Sin marca'],
+    ['Arete de oro 18k argolla', 'Sin marca'],
+    ['Par de aretes de oro 18k con piedra', 'Sin marca'],
+    ['Colgante de oro 18k virgen', 'Sin marca'],
+    ['Colgante de oro 18k cristo', 'Sin marca'],
+    ['Gargantilla de oro 18k', 'Sin marca'],
+    ['Dije de oro 18k', 'Sin marca'],
+    ['Anillo de compromiso oro 18k', 'Sin marca'],
+  ],
+  'Joyería de Plata': [
+    ['Collar de plata 925', 'Sin marca'],
+    ['Pulsera de plata 925', 'Sin marca'],
+    ['Anillo de plata 925', 'Sin marca'],
+    ['Par de aretes de plata 925', 'Sin marca'],
+    ['Cadena de plata 925', 'Sin marca'],
+    ['Colgante de plata con turquesa', 'Sin marca'],
+  ],
+  'Relojes': [
+    ['Reloj de pulsera Casio Edifice', 'Casio'],
+    ['Reloj de pulsera G-Shock', 'Casio'],
+    ['Reloj digital Casio', 'Casio'],
+    ['Reloj de pulsera Seiko 5', 'Seiko'],
+    ['Reloj de pulsera Citizen Eco-Drive', 'Citizen'],
+    ['Smartwatch Galaxy Watch 4', 'Samsung'],
+    ['Smartwatch Watch GT3', 'Huawei'],
+    ['Reloj de pared', 'Sin marca'],
+  ],
+  'Lentes y Óptica': [
+    ['Anteojos con graduación montura metálica', 'Sin marca'],
+    ['Anteojos con graduación montura acetato', 'Sin marca'],
+    ['Lentes de sol polarizados', 'Ray-Ban'],
+    ['Lentes de sol deportivos', 'Sin marca'],
+    ['Binoculares 8x40', 'Sin marca'],
+  ],
+  'Herramientas Eléctricas': [
+    ['Taladro percutor GSB 13 RE', 'Bosch'],
+    ['Amoladora angular 4.5"', 'Bosch'],
+    ['Amoladora DWE4011 4.5"', 'DeWalt'],
+    ['Taladro percutor 650W', 'Black+Decker'],
+    ['Sierra caladora 500W', 'Skil'],
+    ['Atornillador inalámbrico 12V', 'Bosch'],
+    ['Lijadora orbital', 'Black+Decker'],
+  ],
+  'Herramientas Manuales': [
+    ['Caja de herramientas 130 piezas', 'Stanley'],
+    ['Set de llaves mixtas', 'Stanley'],
+    ['Alicate multiusos', 'Sin marca'],
+    ['Nivel de burbuja 60cm', 'Sin marca'],
+    ['Llave francesa 10"', 'Sin marca'],
+    ['Destornilladores juego x6', 'Stanley'],
+  ],
+  'Equipos de Construcción': [
+    ['Mezcladora de concreto 160L', 'Sin marca'],
+    ['Compresora de aire 24L', 'Sin marca'],
+    ['Generador eléctrico 2200W', 'Sin marca'],
+    ['Vibrador para concreto', 'Sin marca'],
+    ['Soldadora eléctrica 200A', 'Sin marca'],
+  ],
+  'Artículos Deportivos': [
+    ['Mancuernas hexagonales 10kg par', 'Sin marca'],
+    ['Mancuernas hexagonales 15kg par', 'Sin marca'],
+    ['Casco de ciclismo', 'Sin marca'],
+    ['Balón de fútbol No. 5', 'Adidas'],
+    ['Raqueta de tenis', 'Wilson'],
+    ['Colchoneta de yoga', 'Sin marca'],
+    ['Rodilleras y coderas set', 'Sin marca'],
+  ],
+  'Bicicletas': [
+    ['Bicicleta de montaña aro 26"', 'Sin marca'],
+    ['Bicicleta de montaña aro 29"', 'Sin marca'],
+    ['Bicicleta urbana aro 28"', 'Sin marca'],
+    ['Bicicleta BMX aro 20"', 'Sin marca'],
+    ['Bicicleta para niño aro 20"', 'Sin marca'],
+    ['Bicicleta plegable', 'Sin marca'],
+  ],
+  'Instrumentos Musicales': [
+    ['Guitarra acústica 6 cuerdas', 'Yamaha'],
+    ['Guitarra electroacústica', 'Yamaha'],
+    ['Guitarra eléctrica Stratocaster', 'Fender'],
+    ['Teclado 61 teclas', 'Casio'],
+    ['Teclado 76 teclas CTK', 'Casio'],
+    ['Charango boliviano artesanal', 'Sin marca'],
+    ['Zampoña artesanal', 'Sin marca'],
+    ['Quena de caña', 'Sin marca'],
+  ],
+  'Ropa y Calzado': [
+    ['Zapatillas urbanas', 'Nike'],
+    ['Zapatillas running', 'Adidas'],
+    ['Zapatillas training', 'Puma'],
+    ['Botas de cuero', 'Sin marca'],
+    ['Campera deportiva', 'Under Armour'],
+    ['Ropa deportiva conjunto', 'Nike'],
+  ],
+  'Bolsos y Carteras': [
+    ['Mochila escolar 35L', 'Sin marca'],
+    ['Mochila de viaje 45L', 'Sin marca'],
+    ['Bolso de mano cuero sintético', 'Sin marca'],
+    ['Cartera de cuero dama', 'Sin marca'],
+    ['Maletín de negocios', 'Sin marca'],
+  ],
+  'Artículos de Cocina': [
+    ['Juego de ollas 8 piezas aluminio', 'Sin marca'],
+    ['Juego de ollas acero inoxidable', 'Sin marca'],
+    ['Sartén antiadherente 28cm', 'Sin marca'],
+    ['Procesador de alimentos', 'Oster'],
+    ['Cuchillería juego x6', 'Sin marca'],
+  ],
+  'Muebles y Decoración': [
+    ['Cuadro decorativo canvas', 'Sin marca'],
+    ['Espejo decorativo con marco', 'Sin marca'],
+    ['Lámpara de mesa LED', 'Sin marca'],
+    ['Alfombra decorativa', 'Sin marca'],
+    ['Reloj de pared decorativo', 'Sin marca'],
+  ],
+  'Antigüedades y Arte': [
+    ['Figura de cerámica andina', 'Sin marca'],
+    ['Monedas antiguas bolivianas lote', 'Sin marca'],
+    ['Cuadro antiguo al óleo', 'Sin marca'],
+    ['Objeto de plata colonial', 'Sin marca'],
+    ['Textil andino antiguo', 'Sin marca'],
+  ],
+  'Coleccionables': [
+    ['Figura coleccionable', 'Sin marca'],
+    ['Tarjetas de fútbol selección Bolivia', 'Sin marca'],
+    ['Álbum de figuritas FIFA', 'Sin marca'],
+    ['Monedas de colección', 'Sin marca'],
+  ],
+  'Libros y Material Educativo': [
+    ['Libros de texto universitarios lote', 'Sin marca'],
+    ['Enciclopedia temática', 'Sin marca'],
+    ['Material de dibujo técnico set', 'Sin marca'],
+    ['Libros de preparatoria lote', 'Sin marca'],
+  ],
+  'Vehículos y Accesorios': [
+    ['Casco de moto certificado', 'Sin marca'],
+    ['Autorradio con bluetooth', 'Pioneer'],
+    ['GPS vehicular', 'Garmin'],
+    ['Repuestos de moto lote', 'Sin marca'],
+    ['Llantas aro 13" par', 'Sin marca'],
+    ['Kit de herramientas para auto', 'Sin marca'],
+  ],
 }
 
-// Montos realistas en bolivianos (Bs)
-// Préstamos bajos: 100-2500 Bs (típico casa de empeño boliviana)
-const LOAN_RANGE = { min: 100, max: 2500 }
+// Montos de préstamo realistas por categoría en bolivianos (Bs)
+// Ajustados al mercado boliviano: casa de empeño pequeña/mediana
+const LOAN_BY_CAT = {
+  'Joyería de Oro':              { min: 500,  max: 6000 },
+  'Joyería de Plata':            { min: 100,  max: 700  },
+  'Relojes':                     { min: 200,  max: 1800 },
+  'Celulares y Smartphones':     { min: 300,  max: 1400 },
+  'Laptops y Computadoras':      { min: 600,  max: 2800 },
+  'Tablets y Lectores':          { min: 150,  max: 700  },
+  'Televisores y Monitores':     { min: 250,  max: 1600 },
+  'Consolas y Videojuegos':      { min: 250,  max: 1100 },
+  'Cámaras y Fotografía':        { min: 150,  max: 900  },
+  'Audio y Parlantes':           { min: 80,   max: 450  },
+  'Electrodomésticos':           { min: 70,   max: 350  },
+  'Herramientas Eléctricas':     { min: 180,  max: 1100 },
+  'Herramientas Manuales':       { min: 50,   max: 280  },
+  'Equipos de Construcción':     { min: 500,  max: 2800 },
+  'Artículos Deportivos':        { min: 50,   max: 320  },
+  'Bicicletas':                  { min: 180,  max: 1100 },
+  'Instrumentos Musicales':      { min: 100,  max: 550  },
+  'Ropa y Calzado':              { min: 50,   max: 220  },
+  'Bolsos y Carteras':           { min: 50,   max: 300  },
+  'Artículos de Cocina':         { min: 50,   max: 250  },
+  'Muebles y Decoración':        { min: 80,   max: 450  },
+  'Antigüedades y Arte':         { min: 200,  max: 1800 },
+  'Coleccionables':              { min: 50,   max: 350  },
+  'Libros y Material Educativo': { min: 20,   max: 130  },
+  'Vehículos y Accesorios':      { min: 100,  max: 750  },
+  'Lentes y Óptica':             { min: 80,   max: 450  },
+}
 
-// Por ley boliviana: interés máximo 3% mensual.
-// La custodia es la variable real de negocio — depende del espacio que ocupa.
-// Categorías agrupadas por tamaño físico:
+// Custodia por tamaño físico del artículo (% mensual sobre capital)
 const CUSTODY_BY_CAT = {
-  // Artículos pequeños → custodia baja (poco espacio, bajo riesgo)
   'Joyería de Oro':              { min: 0.5, max: 1.5 },
   'Joyería de Plata':            { min: 0.5, max: 1.5 },
   'Relojes':                     { min: 0.5, max: 1.5 },
   'Lentes y Óptica':             { min: 0.5, max: 1.0 },
   'Coleccionables':              { min: 0.5, max: 1.0 },
   'Libros y Material Educativo': { min: 0.5, max: 1.0 },
-
-  // Artículos medianos → custodia media
   'Celulares y Smartphones':     { min: 1.0, max: 2.5 },
   'Tablets y Lectores':          { min: 1.0, max: 2.5 },
   'Audio y Parlantes':           { min: 1.0, max: 2.5 },
@@ -172,8 +406,6 @@ const CUSTODY_BY_CAT = {
   'Artículos Deportivos':        { min: 1.5, max: 3.0 },
   'Herramientas Manuales':       { min: 1.0, max: 2.5 },
   'Antigüedades y Arte':         { min: 1.0, max: 2.5 },
-
-  // Artículos grandes → custodia alta (ocupan espacio físico significativo)
   'Laptops y Computadoras':      { min: 2.0, max: 4.0 },
   'Televisores y Monitores':     { min: 2.5, max: 5.0 },
   'Consolas y Videojuegos':      { min: 2.0, max: 3.5 },
@@ -181,8 +413,6 @@ const CUSTODY_BY_CAT = {
   'Herramientas Eléctricas':     { min: 2.0, max: 4.0 },
   'Bicicletas':                  { min: 3.0, max: 6.0 },
   'Muebles y Decoración':        { min: 3.0, max: 6.0 },
-
-  // Artículos muy grandes → custodia máxima
   'Equipos de Construcción':     { min: 5.0, max: 10.0 },
   'Vehículos y Accesorios':      { min: 5.0, max: 10.0 },
 }
@@ -192,16 +422,22 @@ function custodyRateForCat(catName) {
   return rFloat(range.min, range.max)
 }
 
+function loanAmountForCat(catName) {
+  const range = LOAN_BY_CAT[catName] ?? { min: 100, max: 2500 }
+  return rFloat(range.min, range.max)
+}
+
 const EXPENSE_CONCEPTS = [
   'Limpieza y materiales', 'Papelería y útiles de oficina',
   'Servicio de internet', 'Luz eléctrica', 'Alquiler del local',
   'Servicio de seguridad', 'Mantenimiento general', 'Publicidad en redes',
   'Suministros de caja', 'Agua potable', 'Reparación menor',
   'Transporte y movilidad', 'Impuesto municipal', 'Envío de paquetes',
+  'Recarga de extinguidor', 'Material de embalaje',
 ]
 
 const PAY_METHODS = ['cash', 'cash', 'cash', 'qr', 'transfer']
-const INT_TYPES   = ['monthly', 'monthly', 'monthly', 'monthly', 'daily']  // mayoría mensual
+const INT_TYPES   = ['monthly', 'monthly', 'monthly', 'monthly', 'daily']
 const STATUS_DIST = [
   ...Array(40).fill('active'),
   ...Array(20).fill('renewed'),
@@ -221,7 +457,6 @@ async function seed() {
     const adminHash   = await bcrypt.hash('admin123', 10)
     const cajeroHash  = await bcrypt.hash('cajero123', 10)
 
-    // Upsert manual: buscar primero, insertar solo si no existe
     const existingRes = await client.query(
       `SELECT user_id, email, role FROM users WHERE email = ANY($1)`,
       [['admin@pawnshop.com', 'cajero@pawnshop.com']]
@@ -284,18 +519,17 @@ async function seed() {
     // ── 3. Sesiones ────────────────────────────────────────────────────────────
     process.stdout.write('3/8 Sesiones... ')
     const sessionRows = []
-    // Saltear domingos (día libre)
     let diasAgregados = 0
     let diaOffset = NUM_SESSIONS * -1
     while (diasAgregados < NUM_SESSIONS) {
       const d = addDays(today, diaOffset)
       diaOffset++
-      if (d.getDay() === 0) continue  // domingo
+      if (d.getDay() === 0) continue  // domingo — día libre
 
       const uid    = diasAgregados % 3 === 0 ? ADMIN_ID : CASHIER_ID
       const openAt = new Date(d); openAt.setHours(rInt(8, 9), rInt(0, 30), 0, 0)
       const closeAt = new Date(d); closeAt.setHours(rInt(17, 18), rInt(30, 59), 0, 0)
-      const opening = rFloat(200, 800)  // apertura de caja en Bs
+      const opening = rFloat(500, 2000)  // apertura de caja en Bs — más realista para Bolivia
       sessionRows.push([uid, opening, opening, opening, 'closed', openAt, closeAt])
       diasAgregados++
     }
@@ -334,11 +568,11 @@ async function seed() {
       for (let p = 0; p < n; p++) {
         const status     = pick(STATUS_DIST)
         const intType    = pick(INT_TYPES)
-        const loan       = rFloat(LOAN_RANGE.min, LOAN_RANGE.max)
+        const mainCat    = pick(CATEGORY_NAMES)
+        // Préstamo ajustado por categoría — más realista que un rango único
+        const loan       = loanAmountForCat(mainCat)
         // Bolivia: interés máximo legal 3% mensual
         const rate       = intType === 'monthly' ? rFloat(1, 3) : rFloat(0.03, 0.1)
-        // La custodia se determina por la categoría del artículo principal
-        const mainCat    = pick(CATEGORY_NAMES)
         const custody    = custodyRateForCat(mainCat)
         const customerId = pick(customerIds)
 
@@ -350,7 +584,6 @@ async function seed() {
           startDate = addDays(sessDate, -rInt(30, 90))
           dueDate   = addDays(startDate, rInt(15, 45))
         }
-        // guardia: due_date debe ser estrictamente mayor que start_date
         if (dueDate <= startDate) dueDate = addDays(startDate, 15)
 
         pawnRows.push([customerId, sess.user_id, loan, rate, custody, intType, toDate(startDate), toDate(dueDate), status])
@@ -372,7 +605,7 @@ async function seed() {
         const { pawn_id, status } = pRes.rows[i]
         const meta    = pawnMeta[i]
         const numItems = rInt(1, 2)
-        const catName  = meta.mainCat   // usar la misma cat que determinó la custodia
+        const catName  = meta.mainCat
         const catId    = catByName[catName]
         const tpls     = ITEMS_BY_CAT[catName]
 
@@ -507,10 +740,10 @@ async function seed() {
     const expenseMeta = []
 
     for (const sess of sessionInfos) {
-      const n = rInt(0, 2)  // 0-2 gastos por día (boliviana: no todos los días)
+      const n = rInt(0, 2)  // 0-2 gastos por sesión
       for (let e = 0; e < n; e++) {
         const concept = pick(EXPENSE_CONCEPTS)
-        const amount  = rFloat(15, 250)  // gastos en Bs, más modestos
+        const amount  = rFloat(20, 380)  // Bs — rango ajustado para Bolivia
         expenseRows.push([sess.session_id, sess.user_id, concept, amount])
         expenseMeta.push({ session_id: sess.session_id, user_id: sess.user_id, amount, sessDate: new Date(sess.opened_at) })
       }
